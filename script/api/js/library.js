@@ -12,7 +12,7 @@ function newApi(
   permanentQuery = {},
   permanentData = {}
 ) {
-  new Api(permanentUrl, {
+  return new Api(permanentUrl, {
     path: permanentPath,
     query: permanentQuery,
     data: permanentData,
@@ -51,4 +51,9 @@ function method(
   } else if (methodName === 'delete') {
     return methods.del()
   }
+}
+
+const apiLib = {
+  newApi,
+  method,
 }

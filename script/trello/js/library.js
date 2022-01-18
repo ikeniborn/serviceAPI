@@ -40,3 +40,11 @@ function createWebhookForToken(callbackURL, idModel, description) {
     description
   )
 }
+
+const trelloLib = {
+  newInstance,
+  getToken,
+  getTokenMember,
+  getWebHooksForToken,
+  createWebhookForToken,
+}

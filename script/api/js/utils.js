@@ -5,6 +5,13 @@ Object.prototype.isEmpty = function () {
   return false
 }
 
+Object.prototype.copy = function () {
+  if (!Object.keys(this).length) {
+    return JSON.parse(JSON.stringify(this))
+  }
+  return this
+}
+
 String.prototype.isEmpty = function () {
   if (Object.values(this).every((value) => value === '')) {
     return true

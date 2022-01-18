@@ -7,7 +7,7 @@ class Fetch {
    */
   constructor(url, params = { url: '', path: {}, query: {}, data: {} }) {
     this.getParametr(params)
-    this.createUrl(url)
+    this.createUrl(url + params.url)
   }
 
   getParametr(params) {
@@ -15,9 +15,6 @@ class Fetch {
     !pMap.has('path') ? (this.path = {}) : (this.path = pMap.get('path'))
     !pMap.has('query') ? (this.query = {}) : (this.query = pMap.get('query'))
     !pMap.has('data') ? (this.data = {}) : (this.data = pMap.get('data'))
-    !pMap.has('url')
-      ? (this.url = this.url + '')
-      : (this.url = this.url + pMap.get('url'))
   }
 
   createPathParametrs(url, path) {
@@ -74,8 +71,8 @@ class Api {
   }
 
   mergeParams(permanentParams, variableParams) {
-    const params = permanentParams
-    Object.entries(variableParams).forEach((param) => {
+    const params = variableParams
+    Object.entries(permanentParams).forEach((param) => {
       if (!params[param[0]]) {
         params[param[0]] = param[1]
       } else {

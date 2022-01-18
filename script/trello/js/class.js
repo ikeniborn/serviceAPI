@@ -8,15 +8,19 @@ class Instance {
    */
   constructor(key = '', token = '') {
     if (Instance.exists) {
-      console.log('old Trello')
       return Instance.instance
     }
     Instance.instance = this
     Instance.exists = true
-    console.log('new Trello')
-    this.https = 'https://api.trello.com'
-    this.permanentParams = { key, token }
-    apiLib.newApi(this.https, this.permanentParams)
+    this.api = apiLib.newApi(
+      'https://api.trello.com',
+      {},
+      { key, token },
+      {
+        muteHttpExceptions: true,
+        contentType: 'application/json',
+      }
+    )
   }
 }
 
@@ -85,34 +89,41 @@ class Instance {
 
 class TrelloToken {
   constructor() {
-    this.token = new Instance().permanentParams.token
+    this.token = new Instance().api.permanentParams.query.token
   }
 
   getToken(fields = 'all', webhooks = false) {
-    return apiLib.get('/1/tokens/{token}', {
-      path: { token: this.token },
-      query: { fields, webhooks },
-    })
+    return apiLib.method(
+      'get',
+      '/1/tokens/{token}',
+      { token: this.token },
+      { fields, webhooks },
+      {}
+    )
   }
 
   getTokenMember(fields = 'all') {
-    return apiLib.get('/1/tokens/{token}/member', {
-      path: { token: this.token },
-      query: { fields },
-    })
+    return apiLib.method(
+      'get',
+      '/1/tokens/{token}/member',
+      { token: this.token },
+      { fields }
+    )
   }
 
   getWebHooksForToken() {
-    return apiLib.get('/1/tokens/{token}/webhooks', {
-      path: { token: this.token },
+    return apiLib.method('get', '/1/tokens/{token}/webhooks', {
+      token: this.token,
     })
   }
 
   createWebhookForToken(callbackURL, idModel, description = '') {
-    return apiLib.post('/1/tokens/{token}/webhooks', {
-      path: { token: this.token },
-      query: { callbackURL, idModel, description },
-    })
+    return apiLib.method(
+      'post',
+      '/1/tokens/{token}/webhooks',
+      { token: this.token },
+      { callbackURL, idModel, description }
+    )
   }
 }
 
