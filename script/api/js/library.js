@@ -1,61 +1,54 @@
 /**
  * Initialization new API
- * @param {*} https
- * @param {*} permanentParams
+ * @param {string} permanentUrl Permanent URL part
+ * @param {object} permanentPath Permanent path parametr for URL
+ * @param {object} permanentQuery Permanent query parametr
+ *  @param {object} permanentData Permanent data in fetch
  * @returns {apiLib}
  */
-function newApi(https, permanentParams) {
-  new Api(https, permanentParams)
+function newApi(
+  permanentUrl,
+  permanentPath = {},
+  permanentQuery = {},
+  permanentData = {}
+) {
+  new Api(permanentUrl, {
+    path: permanentPath,
+    query: permanentQuery,
+    data: permanentData,
+  })
 }
 
 /**
-   * POST method to fetch
-   * @param {string} api api constructor with path parametr. Example: /1/tokens/{token}
-   * @param {object} paramentr parametr api as { path: {parametr}, query: {query} }. Example: {
-      path: { token: this.apiMethod.token },
-      query: { callbackURL, idModel, description }
-    }
-   * @returns {object} Responce object
-   */
-function post(api, variableParams) {
-  return new Methods().post(api, variableParams)
-}
-
-/**
-   * GET method to fetch
-   * @param {string} api api constructor with path parametr. Example: /1/tokens/{token}
-   * @param {object} paramentr parametr api as { path: {parametr}, query: {query} }. Example: {
-      path: { token: this.apiMethod.token },
-      query: { callbackURL, idModel, description }
-    }
-   * @returns {object} Responce object
-   */
-function get(api, variableParams) {
-  return new Methods().get(api, variableParams)
-}
-
-/**
-   * PUT method to fetch
-   * @param {string} api api constructor with path parametr. Example: /1/tokens/{token}
-   * @param {object} paramentr parametr api as { path: {parametr}, query: {query} }. Example: {
-      path: { token: this.apiMethod.token },
-      query: { callbackURL, idModel, description }
-    }
-   * @returns {object} Responce object
-   */
-function put(api, variableParams) {
-  return new Methods().put(api, variableParams)
-}
-
-/**
-   * GET method to fetch
-   * @param {string} api api constructor with path parametr. Example: /1/tokens/{token}
-   * @param {object} paramentr parametr api as { path: {parametr}, query: {query} }. Example: {
-      path: { token: this.apiMethod.token },
-      query: { callbackURL, idModel, description }
-    }
-   * @returns {object} Responce object
-   */
-function del(api, variableParams) {
-  return new Methods().del(api, variableParams)
+ *
+ * @param {string} methodName Type of fetch method: post, get, put,delete
+ * @param {string} variableUrl Variable part of URL
+ * @param {object} variablePath Variable path parametr of URL
+ * @param {object} variableQuery Variable query parametr of URL
+ * @param {object} variableData Variable data in fetch
+ * @returns Response data from fetch
+ */
+function method(
+  methodName = 'post',
+  variableUrl = '',
+  variablePath = {},
+  variableQuery = {},
+  variableData = {}
+) {
+  const methods = new Methods({
+    url: variableUrl,
+    path: variablePath,
+    query: variableQuery,
+    data: variableData,
+  })
+  methodName = methodName.toLowerCase().trim()
+  if (methodName === 'post') {
+    return methods.post()
+  } else if (methodName === 'get') {
+    return methods.get()
+  } else if (methodName === 'put') {
+    return methods.put()
+  } else if (methodName === 'delete') {
+    return methods.del()
+  }
 }

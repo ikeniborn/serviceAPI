@@ -1,43 +1,34 @@
 class Fetch {
   /**
-   * Create and send fetch
+   * Create url and send fetch
    *
-   * @param {string} https api domain url
-   * @param {object} params api parametrs
+   * @param {string} url domain url
+   * @param {object} params parametrs { url: '', path: {}, query: {}, data: {} }
    */
-  constructor(https, params = {}) {
-    this.https = https
+  constructor(url, params = { url: '', path: {}, query: {}, data: {} }) {
     this.getParametr(params)
-    this.createUrl()
+    this.createUrl(url)
   }
 
   getParametr(params) {
-    const parametrsArray = Object.entries(params)
-    this.pMap = new Map(parametrsArray)
-    parametrsArray.forEach((param) => {
-      this[param[0]] = param[1]
-    })
-    if (!this.pMap.has('path')) {
-      this.path = {}
-      if (this.api.match('token') && this.pMap.has('token')) {
-        this.path.token = this.token
-      }
-    }
-    if (!this.pMap.has('query')) {
-      this.query = {}
-    }
-    if (this.pMap.has('key')) {
-      this.query.key = this.key
-    }
-    if (this.pMap.has('token')) {
-      this.query.token = this.token
-    }
+    const pMap = new Map(Object.entries(params))
+    !pMap.has('path') ? (this.path = {}) : (this.path = pMap.get('path'))
+    !pMap.has('query') ? (this.query = {}) : (this.query = pMap.get('query'))
+    !pMap.has('data') ? (this.data = {}) : (this.data = pMap.get('data'))
+    !pMap.has('url')
+      ? (this.url = this.url + '')
+      : (this.url = this.url + pMap.get('url'))
   }
-  /**
-   * Generate query parametr for api url
-   * @param {object} queryParametrs QUERY PARAMETERS
-   * @returns {TrelloApi}
-   */
+
+  createPathParametrs(url, path) {
+    return url.replace(
+      new RegExp('{([^{]+)}', 'g'),
+      function (_unused, varName) {
+        return path[varName]
+      }
+    )
+  }
+
   createQueryParametrs(query) {
     return Object.entries(query).reduce((queryString, query, index) => {
       if (query[1]) {
@@ -50,41 +41,20 @@ class Fetch {
       return queryString
     }, '')
   }
-  /**
-   * @param {string} api
-   * @param {object} path
-   * @returns {string} newest api paramentr with path parametr
-   */
-  createPathParametrs(api, path) {
-    return api.replace(
-      new RegExp('{([^{]+)}', 'g'),
-      function (_unused, varName) {
-        return path[varName]
-      }
-    )
-  }
-  /**
-   *
-   * @param {string} api part of api link with PATH PARAMETERS. Example: /1/webhooks/{id}
-   * @param {object} path path and query parametr api. Example: {path:{},query:{}}
-   * @returns {TrelloApi} Object TrelloApi
-   */
-  createUrl() {
+
+  createUrl(url) {
     this.url =
-      this.https +
-      this.createPathParametrs(this.api, this.path) +
+      this.createPathParametrs(url, this.path) +
       this.createQueryParametrs(this.query)
-    return this
   }
   /**
    * Send fetch
    * @param {object} data fetch parametr
    * @returns {object} Responce data from fetch
    */
-  fetch(data) {
+  fetch() {
     try {
-      const responce = JSON.parse(UrlFetchApp.fetch(this.url, data))
-      return responce
+      return JSON.parse(UrlFetchApp.fetch(this.url, this.data))
     } catch (error) {
       console.error(e)
     }
@@ -93,54 +63,52 @@ class Fetch {
 
 //todo изучить и применить паттерн фабрики
 class Api {
-  constructor(https, permanentParams = {}) {
+  constructor(permanentUrl, permanentParams = {}) {
     if (Api.exists) {
-      console.log('old Api')
       return Api.instance
     }
     Api.instance = this
     Api.exists = true
-    console.log('new Api')
-    this.https = https
-    this.params = permanentParams
+    this.url = permanentUrl
+    this.permanentParams = permanentParams
+  }
+
+  mergeParams(permanentParams, variableParams) {
+    const params = permanentParams
+    Object.entries(variableParams).forEach((param) => {
+      if (!params[param[0]]) {
+        params[param[0]] = param[1]
+      } else {
+        Object.assign(params[param[0]], param[1])
+      }
+    })
+    return params
   }
 }
 
 class Methods {
-  constructor() {
-    const api = new Api()
-    this.https = api.https
-    this.params = api.params
-    this.data = {
-      muteHttpExceptions: true,
-      contentType: 'application/json',
-    }
+  constructor(variableParams = {}) {
+    const newApi = new Api()
+    this.url = newApi.url
+    this.params = newApi.mergeParams(newApi.permanentParams, variableParams)
   }
-  post(api = '', variableParams = { path: {}, query: {} }, data = {}) {
+  post() {
     this.params.method = 'post'
-    this.params.api = api
-    this.params = Object.assign(this.params, variableParams)
-    return new Fetch(this.https, this.params).fetch(this.data)
+    return new Fetch(this.url, this.params).fetch()
   }
 
-  put(api = '', variableParams = { path: {}, query: {} }) {
+  put() {
     this.params.method = 'put'
-    this.params.api = api
-    this.params = Object.assign(this.params, variableParams)
-    return new Fetch(this.https, this.params).fetch(this.data)
+    return new Fetch(this.url, this.params).fetch()
   }
 
-  get(api = '', variableParams = { path: {}, query: {} }) {
+  get() {
     this.params.method = 'get'
-    this.params.api = api
-    this.params = Object.assign(this.params, variableParams)
-    return new Fetch(this.https, this.params).fetch(this.data)
+    return new Fetch(this.url, this.params).fetch()
   }
 
-  del(api = '', variableParams = { path: {}, query: {} }) {
+  del() {
     this.params.method = 'delete'
-    this.params.api = api
-    this.params = Object.assign(this.params, variableParams)
-    return new Fetch(this.https, this.params).fetch(this.data)
+    return new Fetch(this.url, this.params).fetch()
   }
 }
