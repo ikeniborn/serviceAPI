@@ -1,17 +1,19 @@
 /**
- * Initialization trello API
- * @param {*} key
- * @param {*} token
- * @returns {trelloLib}
+ *
+ * @param {*} fields
+ * @param {*} webhooks
+ * @returns
  */
-function newInstance(key, token) {
-  new Instance(key, token)
-}
-
 function getToken(fields, webhooks) {
   return new TrelloToken().getToken(fields, webhooks)
 }
 
+/**
+ *
+ *
+ * @param {string} fields
+ * @returns
+ */
 function getTokenMember(fields) {
   return new TrelloToken().getTokenMember(fields)
 }
@@ -39,12 +41,4 @@ function createWebhookForToken(callbackURL, idModel, description) {
     idModel,
     description
   )
-}
-
-const trelloLib = {
-  newInstance,
-  getToken,
-  getTokenMember,
-  getWebHooksForToken,
-  createWebhookForToken,
 }
