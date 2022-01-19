@@ -8,9 +8,10 @@ function newInstance(key, token) {
 }
 
 const trelloLib = {
-  newInstance,
-  getToken,
-  getTokenMember,
-  getWebHooksForToken,
-  createWebhookForToken,
+  token,
+  board,
+  webhook,
+  list,
+  action,
+  card,
 }

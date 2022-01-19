@@ -4,8 +4,8 @@
  * @param {*} webhooks
  * @returns
  */
-function getToken(fields, webhooks) {
-  return new TrelloToken().getToken(fields, webhooks)
+function tokenGet(fields, webhooks) {
+  return new Token().get(fields, webhooks)
 }
 
 /**
@@ -14,8 +14,8 @@ function getToken(fields, webhooks) {
  * @param {string} fields
  * @returns
  */
-function getTokenMember(fields) {
-  return new TrelloToken().getTokenMember(fields)
+function tokenGetMember(fields) {
+  return new Token().getMember(fields)
 }
 
 /**
@@ -23,7 +23,7 @@ function getTokenMember(fields) {
  *
  * @returns {array} Array Webhook
  */
-function getWebHooksForToken() {
+function tokenGetWebHooks() {
   return new TrelloToken().getWebHooksForToken()
 }
 
@@ -35,10 +35,13 @@ function getWebHooksForToken() {
  * @param {string} description A description to be displayed when retrieving information about the webhook.
  * @returns {object} Webhook
  */
-function createWebhookForToken(callbackURL, idModel, description) {
-  return new TrelloToken().createWebhookForToken(
-    callbackURL,
-    idModel,
-    description
-  )
+function tokenCreateWebhook(callbackURL, idModel, description) {
+  return new Token().createWebhook(callbackURL, idModel, description)
+}
+
+const token = {
+  tokenGet,
+  tokenGetMember,
+  tokenGetWebHooks,
+  tokenCreateWebhook,
 }
