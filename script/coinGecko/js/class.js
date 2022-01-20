@@ -16,8 +16,7 @@ class Instance {
       {},
       {
         muteHttpExceptions: true,
-        contentType: 'application/json;charset=utf-8 ',
-        header: { accept: 'application/json' },
+        contentType: 'application/json',
       }
     )
   }
@@ -49,6 +48,31 @@ class Price {
         include_24hr_vol,
         include_24hr_change,
         include_last_updated_at,
+      }
+    )
+  }
+}
+
+class Coins {
+  list(include_platform = false) {
+    return apiLib.method(
+      'get',
+      '/coins/list',
+      {},
+      {
+        include_platform,
+      }
+    )
+  }
+  markets(vs_currency = 'usd', ids, price_change_percentage = '24h, 7d, 30d') {
+    return apiLib.method(
+      'get',
+      '/coins/markets',
+      {},
+      {
+        vs_currency,
+        ids,
+        price_change_percentage,
       }
     )
   }

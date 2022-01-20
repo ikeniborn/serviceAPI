@@ -51,9 +51,18 @@ class Fetch {
    */
   fetch() {
     try {
-      return JSON.parse(UrlFetchApp.fetch(this.url, this.data))
+      const response = UrlFetchApp.fetch(this.url, this.data)
+      const text = response.getContentText()
+      const responseCode = response.getResponseCode()
+      if (responseCode !== 200) {
+        console.log('Url: ', this.url)
+        console.log('Response code: ', responseCode)
+        console.log('Content Text: ', response.getContentText())
+      } else {
+        return JSON.parse(text)
+      }
     } catch (error) {
-      console.error(e)
+      console.error(error)
     }
   }
 }
