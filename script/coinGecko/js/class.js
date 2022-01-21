@@ -16,7 +16,7 @@ class Instance {
       {},
       {
         muteHttpExceptions: true,
-        contentType: 'application/json',
+        header: 'accept: application/json',
       }
     )
   }
