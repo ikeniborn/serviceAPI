@@ -60,12 +60,3 @@ function boardGetLists(id) {
 function boardAddList(id, name) {
   new Board(id).addList(name)
 }
-
-const board = {
-  boardGet,
-  boardGetLabel,
-  boardAddLabel,
-  boardUpdateName,
-  boardGetLists,
-  boardAddList,
-}

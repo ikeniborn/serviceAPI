@@ -6,12 +6,3 @@
 function newInstance(key, token) {
   new Instance(key, token)
 }
-
-const trelloLib = {
-  token,
-  board,
-  webhook,
-  list,
-  action,
-  card,
-}

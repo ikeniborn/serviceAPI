@@ -1,9 +1,4 @@
 class Instance {
-  /**
-   * Init trello api instance
-   * @param {string} key
-   * @param {string} token
-   */
   constructor() {
     if (Instance.exists) {
       return Instance.instance

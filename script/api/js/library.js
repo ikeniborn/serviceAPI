@@ -1,8 +1,3 @@
-const apiLib = {
-  newApi,
-  method,
-}
-
 /**
  * Initialization new API
  * @param {string} permanentUrl Permanent URL part

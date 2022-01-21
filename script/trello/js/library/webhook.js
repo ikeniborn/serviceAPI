@@ -33,7 +33,7 @@ function webhookUpdate(id, callbackURL, idModel, active, description) {
 /**
  * Delete a webhook by ID.
  * @param {string} id ID of the webhook to retrieve. Pattern: ^[0-9a-fA-F]{24}$
- * @returns {{}}
+ * @returns {object}
  */
 function webhookDelete(id) {
   return new Webhook().delete(id)
@@ -48,12 +48,4 @@ function webhookDelete(id) {
  */
 function webhookGetFields(id, field) {
   return new Webhook().getFields(id, field)
-}
-
-const webhook = {
-  webhookGet,
-  webhookCreate,
-  webhookUpdate,
-  webhookDelete,
-  webhookGetFields,
 }

@@ -2,7 +2,7 @@
  *
  * @param {*} fields
  * @param {*} webhooks
- * @returns
+ * @returns {object}
  */
 function tokenGet(fields, webhooks) {
   return new Token().get(fields, webhooks)
@@ -12,7 +12,7 @@ function tokenGet(fields, webhooks) {
  *
  *
  * @param {string} fields
- * @returns
+ * @returns {object}
  */
 function tokenGetMember(fields) {
   return new Token().getMember(fields)
@@ -37,11 +37,4 @@ function tokenGetWebHooks() {
  */
 function tokenCreateWebhook(callbackURL, idModel, description) {
   return new Token().createWebhook(callbackURL, idModel, description)
-}
-
-const token = {
-  tokenGet,
-  tokenGetMember,
-  tokenGetWebHooks,
-  tokenCreateWebhook,
 }

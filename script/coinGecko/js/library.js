@@ -5,13 +5,6 @@ function newInstance() {
   new Instance()
 }
 
-const coinGeckoLib = {
-  ping,
-  priceGet,
-  coinsList,
-  coinsMarkets,
-}
-
 function ping() {
   return new Ping().ping()
 }

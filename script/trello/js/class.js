@@ -1,11 +1,6 @@
 //! Create webhook with deploy the web app will be authorized to run using your account data: Only myself.
 //! Use webhook with deploy the web app will be authorized to run using your account data: Anyone.
 class Instance {
-  /**
-   * Init trello api instance
-   * @param {string} key
-   * @param {string} token
-   */
   constructor(key = '', token = '') {
     if (Instance.exists) {
       return Instance.instance
@@ -102,10 +97,6 @@ class Token {
 }
 
 class Board {
-  /**
-   * Api for board
-   * @param {string} id board id. Pattern: ^[0-9a-fA-F]{24}$
-   */
   constructor(id) {
     this.id = id
   }
@@ -166,140 +157,129 @@ class Board {
   }
 }
 
-class TrelloList {
-  constructor(listId) {
-    this.listId = listId
-  }
-  get boardId() {
-    const urlParams = 'lists/' + this.listId + '?'
-    const fetchData = super.get(urlParams)
-    return fetchData.idBoard
-  }
-  get listName() {
-    const urlParams = 'lists/' + this.listId + '?'
-    const fetchData = super.get(urlParams)
-    return fetchData.name
-  }
-  close() {
-    const urlParams = 'lists/' + this.listId + '/closed?value=true&'
-    super.put(urlParams)
-  }
-  moveToBoard(boardId) {
-    const urlParams = 'lists/' + this.listId + '/idBoard?value=' + boardId + '&'
-    super.put(urlParams)
-  }
-  updateName(listName) {
-    const urlParams = 'lists/' + this.listId + '?name=' + listName + '&'
-    super.put(urlParams)
-  }
-  getAllCards() {
-    const urlParams = 'lists/' + this.listId + '/cards?'
-    const fetchData = super.get(urlParams)
-    const cardArray = fetchData.map((card) => {
-      return { id: card.id, name: card.name }
-    })
-    return cardArray
-  }
-  moveAllCards(newListId) {
-    const newList = new TrelloList(newListId)
-    const urlParams =
-      'lists/' +
-      this.listId +
-      '/moveAllCards?idBoard=' +
-      newList.boardId +
-      '&idList=' +
-      newListId +
-      '&'
-    super.post(urlParams)
-  }
-  archiveAllCards() {
-    const urlParams = 'lists/' + this.listId + '/archiveAllCards?'
-    super.post(urlParams)
-  }
-  addCard(cardName, position, labelId) {
-    const urlParams =
-      'cards?pos=' +
-      position +
-      '&name=' +
-      cardName +
-      '&idList=' +
-      this.listId +
-      '&idLabels=' +
-      labelId +
-      '&'
-    const fetchData = super.post(urlParams)
-    return new TrelloCard(fetchData.id)
-  }
-}
+// class TrelloList {
+//   constructor(listId) {
+//     this.listId = listId
+//   }
+//   get boardId() {
+//     const urlParams = 'lists/' + this.listId + '?'
+//     const fetchData = super.get(urlParams)
+//     return fetchData.idBoard
+//   }
+//   get listName() {
+//     const urlParams = 'lists/' + this.listId + '?'
+//     const fetchData = super.get(urlParams)
+//     return fetchData.name
+//   }
+//   close() {
+//     const urlParams = 'lists/' + this.listId + '/closed?value=true&'
+//     super.put(urlParams)
+//   }
+//   moveToBoard(boardId) {
+//     const urlParams = 'lists/' + this.listId + '/idBoard?value=' + boardId + '&'
+//     super.put(urlParams)
+//   }
+//   updateName(listName) {
+//     const urlParams = 'lists/' + this.listId + '?name=' + listName + '&'
+//     super.put(urlParams)
+//   }
+//   getAllCards() {
+//     const urlParams = 'lists/' + this.listId + '/cards?'
+//     const fetchData = super.get(urlParams)
+//     const cardArray = fetchData.map((card) => {
+//       return { id: card.id, name: card.name }
+//     })
+//     return cardArray
+//   }
+//   moveAllCards(newListId) {
+//     const newList = new TrelloList(newListId)
+//     const urlParams =
+//       'lists/' +
+//       this.listId +
+//       '/moveAllCards?idBoard=' +
+//       newList.boardId +
+//       '&idList=' +
+//       newListId +
+//       '&'
+//     super.post(urlParams)
+//   }
+//   archiveAllCards() {
+//     const urlParams = 'lists/' + this.listId + '/archiveAllCards?'
+//     super.post(urlParams)
+//   }
+//   addCard(cardName, position, labelId) {
+//     const urlParams =
+//       'cards?pos=' +
+//       position +
+//       '&name=' +
+//       cardName +
+//       '&idList=' +
+//       this.listId +
+//       '&idLabels=' +
+//       labelId +
+//       '&'
+//     const fetchData = super.post(urlParams)
+//     return new TrelloCard(fetchData.id)
+//   }
+// }
 
-class TrelloCard {
-  constructor(cardId) {
-    super()
-    this.cardId = cardId
-  }
-  get listId() {
-    const urlParams = 'cards/' + this.cardId + '/list?&'
-    const fetchData = super.get(urlParams)
-    return fetchData.id
-  }
-  get boardId() {
-    const urlParams = 'cards/' + this.cardId + '/list?&'
-    const fetchData = super.get(urlParams)
-    return fetchData.idBoard
-  }
-  get labels() {
-    const urlParams = 'cards/' + this.cardId + '/labels?'
-    const fetchData = super.get(urlParams)
-    return fetchData
-  }
-  addComment(comment) {
-    const urlParams =
-      'cards/' + this.cardId + '/actions/comments?text=' + comment + '&'
-    super.post(urlParams)
-  }
-  moveToList(listId, newListId) {
-    const newList = new TrelloList(newListId)
-    const urlParams =
-      'cards/' +
-      this.cardId +
-      '/idBoard?value=' +
-      newList.boardId +
-      '&idList=' +
-      listId +
-      '&'
-    const fetchData = super.put(urlParams)
-    return fetchData.id
-  }
-  updateDescription(description) {
-    const urlParams = 'cards/' + this.cardId + '?desc=' + description + '&'
-    super.put(urlParams)
-  }
-  close() {
-    const urlParams = '/cards/' + this.cardId + '?closed=true&'
-    super.put(urlParams)
-  }
-}
+// class TrelloCard {
+//   constructor(cardId) {
+//     this.cardId = cardId
+//     new Instance()
+//   }
+//   get listId() {
+//     const urlParams = 'cards/' + this.cardId + '/list?&'
+//     const fetchData = super.get(urlParams)
+//     return fetchData.id
+//   }
+//   get boardId() {
+//     const urlParams = 'cards/' + this.cardId + '/list?&'
+//     const fetchData = super.get(urlParams)
+//     return fetchData.idBoard
+//   }
+//   get labels() {
+//     const urlParams = 'cards/' + this.cardId + '/labels?'
+//     const fetchData = super.get(urlParams)
+//     return fetchData
+//   }
+//   addComment(comment) {
+//     const urlParams =
+//       'cards/' + this.cardId + '/actions/comments?text=' + comment + '&'
+//     super.post(urlParams)
+//   }
+//   moveToList(listId, newListId) {
+//     const newList = new TrelloList(newListId)
+//     const urlParams =
+//       'cards/' +
+//       this.cardId +
+//       '/idBoard?value=' +
+//       newList.boardId +
+//       '&idList=' +
+//       listId +
+//       '&'
+//     const fetchData = super.put(urlParams)
+//     return fetchData.id
+//   }
+//   updateDescription(description) {
+//     const urlParams = 'cards/' + this.cardId + '?desc=' + description + '&'
+//     super.put(urlParams)
+//   }
+//   close() {
+//     const urlParams = '/cards/' + this.cardId + '?closed=true&'
+//     super.put(urlParams)
+//   }
+// }
 
-class TrelloAction {
-  constructor(actionId) {
-    super()
-    this.actionId = actionId
-  }
-  addCardReaction(reaction) {
-    payload = { payload: JSON.stringify(reaction) }
-    this.constantParams = Object.assign(this.constantParams, payload)
-    const urlParams = 'actions/' + postObject.actionId + '/reactions?'
-    super.post(urlParams)
-  }
-}
-
-class TrelloRequest {
-  constructor(e) {
-    this.contents = JSON.parse(e.postData.contents)
-    if (contents) this.actionType = contents.action.type
-  }
-  addLog(table) {
-    const promise = new Promise(function (resolve) {})
-    new GoogleSheet(DATABASE, table)
-  }
-}
+// class TrelloAction {
+//   constructor(actionId) {
+//     new Instance()
+//     this.actionId = actionId
+//   }
+//   addCardReaction(reaction) {
+//     payload = { payload: JSON.stringify(reaction) }
+//     this.constantParams = Object.assign(this.constantParams, payload)
+//     const urlParams = 'actions/' + postObject.actionId + '/reactions?'
+//     super.post(urlParams)
+//   }
+// }
