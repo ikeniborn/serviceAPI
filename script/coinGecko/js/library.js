@@ -1,10 +1,3 @@
-/**
- * Initialization coinGecko API
- */
-function newInstance() {
-  new Instance()
-}
-
 function ping() {
   return new Ping().ping()
 }
@@ -57,4 +50,10 @@ function coinsList(include_platform) {
  */
 function coinsMarkets(vs_currency, ids, price_change_percentage) {
   return new Coins().markets(vs_currency, ids, price_change_percentage)
+}
+
+const coinGeckoLib = {
+  ping,
+  coinsList,
+  coinsMarkets,
 }

@@ -58,6 +58,12 @@ class Fetch {
         console.log('Url: ', this.url)
         console.log('Response code: ', responseCode)
         console.log('Content Text: ', response.getContentText())
+        Browser.msgBox(
+          'Response code: ' +
+            responseCode +
+            ', Content Text: ' +
+            response.getContentText()
+        )
       } else {
         return JSON.parse(text)
       }

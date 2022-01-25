@@ -18,12 +18,18 @@ class Instance {
 }
 
 class Ping {
+  constructor() {
+    new Instance()
+  }
   ping() {
     return apiLib.method('get', '/ping')
   }
 }
 
 class Price {
+  constructor() {
+    new Instance()
+  }
   get(
     ids,
     vs_currencies,
@@ -49,6 +55,9 @@ class Price {
 }
 
 class Coins {
+  constructor() {
+    new Instance()
+  }
   list(include_platform = false) {
     return apiLib.method(
       'get',
