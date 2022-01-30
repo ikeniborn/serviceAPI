@@ -6,7 +6,7 @@ class Instance {
     Instance.instance = this
     Instance.exists = true
     this.api = apiLib.newApi(
-      'https://api.coingecko.com/api/v3',
+      'https://api.coingecko.com/api/v3/',
       {},
       {},
       {
@@ -22,7 +22,7 @@ class Ping {
     new Instance()
   }
   ping() {
-    return apiLib.method('get', '/ping')
+    return apiLib.method('get', 'ping')
   }
 }
 
@@ -40,7 +40,7 @@ class Price {
   ) {
     return apiLib.method(
       'get',
-      '/simple/price',
+      'simple/price',
       {},
       {
         ids,
@@ -61,7 +61,7 @@ class Coins {
   list(include_platform = false) {
     return apiLib.method(
       'get',
-      '/coins/list',
+      'coins/list',
       {},
       {
         include_platform,
@@ -71,7 +71,7 @@ class Coins {
   markets(vs_currency = 'usd', ids, price_change_percentage = '24h, 7d, 30d') {
     return apiLib.method(
       'get',
-      '/coins/markets',
+      'coins/markets',
       {},
       {
         vs_currency,
@@ -79,5 +79,25 @@ class Coins {
         price_change_percentage,
       }
     )
+  }
+  history(id, date, localization = 'en') {
+    const resp = apiLib.method(
+      'get',
+      'coins/{id}/history',
+      { id },
+      {
+        date,
+        localization,
+      }
+    )
+    return {
+      date: date,
+      id: resp.id,
+      symbol: resp.symbol,
+      name: resp.name,
+      price: resp.market_data.current_price.usd,
+      market_cap: resp.market_data.market_cap.usd,
+      total_volume: resp.market_data.total_volume.usd,
+    }
   }
 }

@@ -3,7 +3,7 @@
  *
  * @param {string} app_id Your App ID
  */
-function newInstance(app_id) {
+function instance(app_id) {
   new Instance(app_id)
 }
 

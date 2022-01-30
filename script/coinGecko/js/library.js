@@ -52,8 +52,14 @@ function coinsMarkets(vs_currency, ids, price_change_percentage) {
   return new Coins().markets(vs_currency, ids, price_change_percentage)
 }
 
-const coinGeckoLib = {
-  ping,
-  coinsList,
-  coinsMarkets,
+/**
+ * Get historical data (name, price, market, stats) at a given date for a coin
+ *
+ * @param {string} id pass the coin id (can be obtained from /coins) eg. bitcoin
+ * @param {string} date The date of data snapshot in dd-mm-yyyy eg. 30-12-2017
+ * @param {string} localization Set to false to exclude localized languages in response
+ * @returns {object}
+ */
+function coinsHistory(id, date, localization) {
+  return new Coins().history(id, date, localization)
 }
