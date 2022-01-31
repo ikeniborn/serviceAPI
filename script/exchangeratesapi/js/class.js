@@ -25,7 +25,7 @@ class Rates {
   currencies() {
     return apiLib.method('get', 'currencies.json').symbols
   }
-  latest(symbols = 'RUB') {
+  latest(symbols = 'USD') {
     return apiLib.method(
       'get',
       'latest.json',
@@ -36,7 +36,7 @@ class Rates {
       }
     ).rates
   }
-  history(date, symbols = 'RUB') {
+  history(date, symbols = 'USD') {
     return apiLib.method(
       'get',
       'historical/{date}.json',

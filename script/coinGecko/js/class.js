@@ -30,6 +30,7 @@ class Price {
   constructor() {
     new Instance()
   }
+
   get(
     ids,
     vs_currencies,
@@ -58,46 +59,32 @@ class Coins {
   constructor() {
     new Instance()
   }
+
   list(include_platform = false) {
-    return apiLib.method(
-      'get',
-      'coins/list',
-      {},
-      {
-        include_platform,
-      }
+    return (
+      apiLib.method(
+        'get',
+        'coins/list',
+        {},
+        {
+          include_platform,
+        }
+      ) || []
     )
   }
-  markets(vs_currency = 'usd', ids, price_change_percentage = '24h, 7d, 30d') {
-    return apiLib.method(
-      'get',
-      'coins/markets',
-      {},
-      {
-        vs_currency,
-        ids,
-        price_change_percentage,
-      }
+
+  markets(ids, vs_currency = 'usd', price_change_percentage = '24h, 7d, 30d') {
+    return (
+      apiLib.method(
+        'get',
+        'coins/markets',
+        {},
+        {
+          vs_currency,
+          ids,
+          price_change_percentage,
+        }
+      ) || []
     )
-  }
-  history(id, date, localization = 'en') {
-    const resp = apiLib.method(
-      'get',
-      'coins/{id}/history',
-      { id },
-      {
-        date,
-        localization,
-      }
-    )
-    return {
-      date: date,
-      id: resp.id,
-      symbol: resp.symbol,
-      name: resp.name,
-      price: resp.market_data.current_price.usd,
-      market_cap: resp.market_data.market_cap.usd,
-      total_volume: resp.market_data.total_volume.usd,
-    }
   }
 }

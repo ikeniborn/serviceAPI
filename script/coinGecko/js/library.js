@@ -46,20 +46,8 @@ function coinsList(include_platform) {
  * @param {string} vs_currency The target currency of market data (usd, eur, jpy, etc.)
  * @param {string} ids The ids of the coin, comma separated crytocurrency symbols (base). refers to /coins/list
  * @param {string} price_change_percentage Include price change percentage in 1h, 24h, 7d, 14d, 30d, 200d, 1y (eg. '1h,24h,7d' comma-separated, invalid values will be discarded)
- * @returns {object}
+ * @returns {array}
  */
-function coinsMarkets(vs_currency, ids, price_change_percentage) {
-  return new Coins().markets(vs_currency, ids, price_change_percentage)
-}
-
-/**
- * Get historical data (name, price, market, stats) at a given date for a coin
- *
- * @param {string} id pass the coin id (can be obtained from /coins) eg. bitcoin
- * @param {string} date The date of data snapshot in dd-mm-yyyy eg. 30-12-2017
- * @param {string} localization Set to false to exclude localized languages in response
- * @returns {object}
- */
-function coinsHistory(id, date, localization) {
-  return new Coins().history(id, date, localization)
+function coinsMarkets(ids, vs_currency, price_change_percentage) {
+  return new Coins().markets(ids, vs_currency, price_change_percentage)
 }

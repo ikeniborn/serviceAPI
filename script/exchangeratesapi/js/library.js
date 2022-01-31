@@ -23,7 +23,7 @@ function getCurrencies() {
  * @param {string} symbols Limit results to specific currencies (comma-separated list of 3-letter codes)
  * @returns {object}
  */
-function getLatest(base, symbols) {
+function getLatest(symbols, base) {
   return new Rates(base).latest(symbols)
 }
 
@@ -35,6 +35,6 @@ function getLatest(base, symbols) {
  * @param {string} symbols Limit results to specific currencies (comma-separated list of 3-letter codes)
  * @returns
  */
-function getHistory(base, date, symbols) {
+function getHistory(date, symbols, base) {
   return new Rates(base).history(date, symbols)
 }

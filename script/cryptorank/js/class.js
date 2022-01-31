@@ -18,9 +18,9 @@ class Instance {
 }
 
 class Currencies {
-  constructor(ids = '1', convert = 'USD') {
+  constructor(symbols = '', convert = 'USD') {
     new Instance()
-    this.ids = ids
+    this.symbols = symbols
     if (['USD', 'BTC', 'ETH'].indexOf(convert) === -1) {
       this.convert = 'USD'
     } else {
@@ -34,7 +34,7 @@ class Currencies {
       {},
       {
         convert: this.convert,
-        ids: this.ids,
+        symbols: this.symbols,
       }
     ).data
   }
