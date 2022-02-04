@@ -1,47 +1,105 @@
+class Instance {
+  constructor(
+    environment = [
+      {
+        spreadSheetName: '',
+        sheetId: '',
+        scriptId: '',
+        excludeSheetName: [],
+        area: '',
+      },
+    ]
+  ) {
+    if (Instance.exists) {
+      return Instance.instance
+    }
+    Instance.instance = this
+    Instance.exists = true
+    this.getInstance(environment)
+  }
+
+  getInstance(environment) {
+    const gs = new GasScript('Instance.getInstance')
+    try {
+      const ssApp = SpreadsheetApp
+      const sApp = ScriptApp
+      const currentArea = environment.reduce((area, row) => {
+        if (row.scriptId === sApp.getScriptId()) {
+          area = row.area
+        }
+        return area
+      }, '')
+      if (currentArea) {
+        environment.forEach((row) => {
+          if (row.area === currentArea) {
+            const ss = ssApp.openById(row.sheetId)
+            const ssName = row.spreadSheetName.toLowerCase()
+            if (!this[ssName]) {
+              this[ssName] = {}
+            }
+            this[ssName].ss = ss
+            if (!row.excludeSheetName) {
+              this[ssName].excludeSheetName = []
+            } else {
+              this[ssName].excludeSheetName = row.excludeSheetName.map((m) =>
+                m.toLowerCase()
+              )
+            }
+          }
+        })
+      } else {
+        gs.error('Check environment!!!')
+      }
+    } catch (error) {
+      gs.error(error)
+    }
+  }
+}
+
 class GasSpreadSheet {
   /**
    * Получение книги инстанса
    */
   constructor(spreadSheetName = '') {
-    const src = new Instance().getInstance().src[spreadSheetName];
-    this.ss = SpreadsheetApp.openById(src);
+    const instance = new Instance()[spreadSheetName]
+    this.spreadSheetName = spreadSheetName
+    this.ss = instance.ss
+    this.excludeSheetName = instance.excludeSheetName
   }
 }
 
 class GasWorkSheet extends GasSpreadSheet {
-  /**
-   * Получение листа книги
-   * @param {string} spreadSheetName название книги инстанса в нижнем регистре
-   * @param {string} sheetName название листа в нижнем регистре
-   * @param {number} headerRowNum номер строки заголовка. По-умолчанию равно 1
-   */
-
   constructor(spreadSheetName = '', sheetName = '', headerRowNum = 1) {
-    super(spreadSheetName);
-    this.headerRowNum = headerRowNum;
+    super(spreadSheetName)
+    sheetName = sheetName.toLowerCase()
+    this.headerRowNum = headerRowNum
     this.ws = this.ss
       .getSheets()
-      .filter((f) => f.getName().toLowerCase() === sheetName.toLowerCase())[0];
-    this.getRange().getValues();
+      .filter(
+        (f) =>
+          f.getName().toLowerCase() === sheetName &&
+          this.excludeSheetName.indexOf(sheetName) === -1
+      )[0]
+    this.getRange().getValues()
   }
 
   /**
    * Последняя строка на листе
    */
   get lastRow() {
-    return this.ws.getLastRow();
+    return this.ws.getLastRow()
   }
 
   get maxRow() {
-    return this.ws.getMaxRows();
+    return this.ws.getMaxRows()
   }
 
   get lastColumn() {
-    return this.ws.getLastColumn();
+    return this.ws.getLastColumn()
   }
 
   get maxColumn() {
-    return this.ws.getMaxColumns();
+    return this.ws.getMaxColumns()
   }
 
   /**
@@ -49,11 +107,18 @@ class GasWorkSheet extends GasSpreadSheet {
    * @returns range, countRow, countColumn
    */
   getRange() {
-    const dataRange = this.ws.getDataRange();
+    const dataRange = this.ws.getDataRange()
     //* Удаление заголовка
-    this.countRow = dataRange.getNumRows() - this.headerRowNum;
-    this.countColumn = dataRange.getNumColumns();
-    this.range =
+    this.countRow = dataRange.getNumRows() - this.headerRowNum
+    this.countColumn = dataRange.getNumColumns()
+    //* формирование заголовка
+    this.headerRange = dataRange.offset(
+      this.headerRowNum - 1,
+      0,
+      1,
+      this.countColumn
+    )
+    this.dataRange =
       this.countRow > 0
         ? dataRange.offset(
             this.headerRowNum,
@@ -61,8 +126,8 @@ class GasWorkSheet extends GasSpreadSheet {
             this.countRow,
             this.countColumn
           )
-        : dataRange.offset(this.headerRowNum, 0, 1, this.countColumn);
-    return this;
+        : this.headerRange
+    return this
   }
 
   /**
@@ -72,44 +137,45 @@ class GasWorkSheet extends GasSpreadSheet {
    * @returns
    */
   getValues(getRowNum = false, getRowHash = false) {
-    this.values = this.range.getValues().map((row, index) => {
+    this.headerValues = this.headerRange.getValues()[0]
+    this.dataValues = this.dataRange.getValues().map((row, index) => {
       if (getRowNum && !getRowHash) {
-        const rowNum = index + this.headerRowNum + 1;
-        return [rowNum, ...row];
+        const rowNum = index + this.headerRowNum + 1
+        return [rowNum, ...row]
       } else if (!getRowNum && getRowHash) {
-        return [new Hash(row.join('#')).md5, ...row];
+        return [new Hash(row.join('#')).md5, ...row]
       } else if (getRowNum && getRowHash) {
-        const rowNum = index + this.headerRowNum + 1;
-        return [rowNum, new Hash(row.join('#')).md5, ...row];
+        const rowNum = index + this.headerRowNum + 1
+        return [rowNum, new Hash(row.join('#')).md5, ...row]
       } else {
-        return row;
+        return row
       }
-    });
-    return this;
+    })
+    return this
   }
 
   /**
    *  Удаление пустых строк
    */
   deleteEmptyRows() {
-    const countEmptyRow = this.maxRow - this.lastRow;
-    const firstEmptyRow = this.lastRow + 1;
+    const countEmptyRow = this.maxRow - this.lastRow
+    const firstEmptyRow = this.lastRow + 1
     if (countEmptyRow) {
-      this.ws.deleteRows(firstEmptyRow, countEmptyRow);
+      this.ws.deleteRows(firstEmptyRow, countEmptyRow)
     }
-    return this;
+    return this
   }
 
   /**
    *  Удаление пустых колоно
    */
   deleteEmptyColumns() {
-    const countEmptyRow = this.maxColumn - this.lastColumn;
-    const firstEmptyRow = this.lastColumn + 1;
+    const countEmptyRow = this.maxColumn - this.lastColumn
+    const firstEmptyRow = this.lastColumn + 1
     if (countEmptyRow) {
-      this.ws.deleteColumns(firstEmptyRow, countEmptyRow);
+      this.ws.deleteColumns(firstEmptyRow, countEmptyRow)
     }
-    return this;
+    return this
   }
 }
 
@@ -119,8 +185,8 @@ class GoogleCache {
    * @param {integer} seconds Время хранения кэша в секундах
    */
   constructor(seconds = 60) {
-    this.seconds = seconds;
-    this.cache = CacheService.getScriptCache();
+    this.seconds = seconds
+    this.cache = CacheService.getScriptCache()
   }
 
   /**
@@ -129,9 +195,9 @@ class GoogleCache {
    * @param data - строка
    */
   addCache(object) {
-    const key = Object.keys(object)[0];
-    const data = JSON.stringify(object[key]);
-    this.cache.put(key, data, this.seconds);
+    const key = Object.keys(object)[0]
+    const data = JSON.stringify(object[key])
+    this.cache.put(key, data, this.seconds)
   }
 
   /**
@@ -139,7 +205,7 @@ class GoogleCache {
    * @param {object} object Данные в формате {key:value}
    */
   addAllCache(object) {
-    this.cache.putAll(object, this.seconds);
+    this.cache.putAll(object, this.seconds)
   }
 
   /**
@@ -148,7 +214,7 @@ class GoogleCache {
    * @returns
    */
   getCache(key) {
-    return JSON.parse(this.cache.get(key)) || void 0;
+    return JSON.parse(this.cache.get(key)) || void 0
   }
 
   /**
@@ -157,7 +223,7 @@ class GoogleCache {
    * @returns
    */
   getAllCache(keys) {
-    return this.cache.getAll(keys);
+    return this.cache.getAll(keys)
   }
 
   /**
@@ -165,7 +231,7 @@ class GoogleCache {
    * @param {string} key
    */
   removeCache(key) {
-    this.cache.remove(key);
+    this.cache.remove(key)
   }
 
   /**
@@ -173,53 +239,53 @@ class GoogleCache {
    * @param {array} keys
    */
   removeAllCache(keys) {
-    this.cache.removeAll(keys);
+    this.cache.removeAll(keys)
   }
 }
 
 class GasScript {
   constructor(parametr) {
-    this.parametr = parametr + ': ';
-    this.startDate = new Date();
+    this.parametr = parametr + ': '
+    this.startDate = new Date()
   }
   getLastProjectVersion() {
     const url =
-      'https://script.googleapis.com/v1/projects/' + scriptId + '/versions';
+      'https://script.googleapis.com/v1/projects/' + scriptId + '/versions'
 
     const res = UrlFetchApp.fetch(url, {
       headers: { Authorization: 'Bearer ' + ScriptApp.getOAuthToken() },
-    });
-    return Math.max(JSON.parse(res).versions.map((m) => (m = m.versionNumber)));
+    })
+    return Math.max(JSON.parse(res).versions.map((m) => (m = m.versionNumber)))
   }
   error(value) {
-    console.error(this.parametr, value);
+    console.error(this.parametr, value)
   }
   info(value) {
-    console.info(this.parametr, value);
+    console.info(this.parametr, value)
   }
   timeExecution() {
-    const time = new FormatDate(this.startDate).getTimeDiff();
-    console.info(this.parametr, time);
-    return time;
+    const time = new FormatDate(this.startDate).getTimeDiff()
+    console.info(this.parametr, time)
+    return time
   }
   flush() {
-    SpreadsheetApp.flush();
+    SpreadsheetApp.flush()
   }
 }
 
 class ModalDialog {
   constructor(htmlTempate, width, height) {
-    this.html = htmlTempate;
-    this.width = width;
-    this.height = height;
+    this.html = htmlTempate
+    this.width = width
+    this.height = height
   }
 
   showModalDialog(title) {
     const output = HtmlService.createTemplateFromFile(this.html)
       .evaluate()
       .setWidth(this.width)
-      .setHeight(this.height);
-    SpreadsheetApp.getUi().showModalDialog(output, title);
+      .setHeight(this.height)
+    SpreadsheetApp.getUi().showModalDialog(output, title)
   }
 
   closeModalDialog(title, timer = 200) {
@@ -229,24 +295,24 @@ class ModalDialog {
         ');function myTimer() { google.script.host.close();}</script>'
     )
       .setWidth(this.width)
-      .setHeight(this.height);
-    SpreadsheetApp.getUi().showModalDialog(output, title);
+      .setHeight(this.height)
+    SpreadsheetApp.getUi().showModalDialog(output, title)
   }
 }
 
 class FileDB {
   constructor(fileName) {
-    this.fileName = fileName;
-    this.dApp = DriveApp;
+    this.fileName = fileName
+    this.dApp = DriveApp
   }
   createFile(data) {
-    return DriveApp.createFile(this.fileName, JSON.stringify(data));
+    return DriveApp.createFile(this.fileName, JSON.stringify(data))
   }
   getDataFromFile() {
-    const file = DriveApp.getFilesByName(this.fileName).next();
+    const file = DriveApp.getFilesByName(this.fileName).next()
 
-    const info = file.getAs('application/octet-stream').getDataAsString();
-    return JSON.parse(info);
+    const info = file.getAs('application/octet-stream').getDataAsString()
+    return JSON.parse(info)
   }
 }
 class Metadata {
@@ -255,7 +321,7 @@ class Metadata {
    * @param {object} target объект метаданных: принимает книгу, лист, диапазон
    */
   constructor(target) {
-    this.target = target;
+    this.target = target
     this.metadata = target.getDeveloperMetadata().reduce((keys, metadata) => {
       keys[metadata.getKey()] = {
         remove: () => metadata.remove(),
@@ -263,10 +329,10 @@ class Metadata {
         getValue: () => metadata.getValue(),
         setValue: (value) => metadata.setValue(value),
         value: metadata.getValue(),
-      };
-      return keys;
-    }, {});
-    this.metaMap = new Map(Object.entries(this.metadata));
+      }
+      return keys
+    }, {})
+    this.metaMap = new Map(Object.entries(this.metadata))
   }
   /**
    * Добавление значения в метаданные листа
@@ -274,12 +340,12 @@ class Metadata {
    * @param {string} value значение ключа
    */
   addMetadata(key, value) {
-    const newValue = value;
+    const newValue = value
     if (this.metaMap.has(key)) {
-      const oldValue = this.metadata[key].getValue();
+      const oldValue = this.metadata[key].getValue()
       if (new Hash(newValue).md5 !== new Hash(oldValue).md5) {
-        this.metadata[key].setValue(newValue);
-        this.metadata[key].value = newValue;
+        this.metadata[key].setValue(newValue)
+        this.metadata[key].value = newValue
       }
     } else {
       this.metadata = this.target
@@ -291,29 +357,29 @@ class Metadata {
             getKey: () => metadata.getKey(),
             getValue: () => metadata.getValue(),
             setValue: (value) => metadata.setValue(value),
-          };
-          return keys;
-        }, {});
-      this.metaMap = new Map(Object.entries(this.metadata));
+          }
+          return keys
+        }, {})
+      this.metaMap = new Map(Object.entries(this.metadata))
     }
   }
 
   getMetadata(key) {
     if (this.metaMap.has(key)) {
-      return this.metadata[key].getValue();
+      return this.metadata[key].getValue()
     }
   }
 
   deleteMetadata(key) {
-    key = key.toString();
+    key = key.toString()
     if (this.metaMap.has(key)) {
-      this.metadata[key].remove();
+      this.metadata[key].remove()
     }
   }
   deleteAllMetadata() {
     Object.keys(this.metadata).forEach((key) => {
-      this.metadata[key].remove();
-    });
+      this.metadata[key].remove()
+    })
   }
 }
 
@@ -323,18 +389,18 @@ class SheetMetadata extends Metadata {
    * @param {object} sheet объект листа
    */
   constructor(sheet) {
-    super(sheet);
-    this.sheetName = sheet.getName().toUpperCase();
+    super(sheet)
+    this.sheetName = sheet.getName().toUpperCase()
   }
   /**
    * Добавление ключа строки в метаданные
    * @param {number} rowNum номер строки листа
    */
   addRowKey(rowNum) {
-    const key = 'ROWKEY_' + rowNum;
-    const value = new Hash(this.sheetName + '#' + rowNum).md5;
-    super.addMetadata(key, value);
-    return value;
+    const key = 'ROWKEY_' + rowNum
+    const value = new Hash(this.sheetName + '#' + rowNum).md5
+    super.addMetadata(key, value)
+    return value
   }
   /**
    * Получение ключа строки с листа
@@ -342,55 +408,55 @@ class SheetMetadata extends Metadata {
    * @returns строка в формате Hash
    */
   getRowKey(rowNum) {
-    const key = 'ROWKEY_' + rowNum;
-    return super.getMetadata(key);
+    const key = 'ROWKEY_' + rowNum
+    return super.getMetadata(key)
   }
   /**
    * Добавление ключа листа в метаданные
    * @param {string} sheetKey ключ листа в формате Hash
    */
   addSheetKey() {
-    const value = new Hash(this.sheetName).md5;
-    super.addMetadata('SHEETKEY', value);
-    return value;
+    const value = new Hash(this.sheetName).md5
+    super.addMetadata('SHEETKEY', value)
+    return value
   }
   /**
    * Получение ключа листа из метаданных
    * @returns ключ листа в формате Hash
    */
   getSheetKey() {
-    return super.getMetadata('SHEETKEY');
+    return super.getMetadata('SHEETKEY')
   }
   /**
    * Изменение счетчика изменений
    * @param {boolean} clear признак обнуления счетчика
    */
   updateCountChange(clear = false) {
-    const oldValue = new ETL(super.getMetadata('COUNTCHANGE')).toNumber() || 0;
-    let newValue;
+    const oldValue = new ETL(super.getMetadata('COUNTCHANGE')).toNumber() || 0
+    let newValue
     if (clear) {
-      newValue = 0;
+      newValue = 0
     } else {
-      newValue = oldValue + 1;
+      newValue = oldValue + 1
     }
-    super.addMetadata('COUNTCHANGE', newValue);
-    return newValue;
+    super.addMetadata('COUNTCHANGE', newValue)
+    return newValue
   }
   /**
    * Показ текущего количества изменений листа
    * @returns число изменений
    */
   getCountChange() {
-    return new ETL(super.getMetadata('COUNTCHANGE')).toNumber() || 0;
+    return new ETL(super.getMetadata('COUNTCHANGE')).toNumber() || 0
   }
 
   getSheetName() {
-    const oldValue = super.getMetadata('SHEETNAME');
+    const oldValue = super.getMetadata('SHEETNAME')
     if (oldValue) {
-      return oldValue;
+      return oldValue
     } else {
-      super.addMetadata('SHEETNAME', this.sheetName);
-      return this.sheetName;
+      super.addMetadata('SHEETNAME', this.sheetName)
+      return this.sheetName
     }
   }
 }
@@ -401,7 +467,7 @@ class SpreadSheetMetadata extends Metadata {
    * @param {object} spreadsheet объект книга
    */
   constructor(spreadsheet) {
-    super(spreadsheet);
+    super(spreadsheet)
   }
   /**
    * Получение договорных условий по клиенту из метаданных
@@ -409,10 +475,10 @@ class SpreadSheetMetadata extends Metadata {
    * @returns объект ключ/значение по условиям
    */
   getTerm(sheetKey) {
-    sheetKey = 'TERMKEY_' + sheetKey;
-    const term = super.getMetadata(sheetKey);
+    sheetKey = 'TERMKEY_' + sheetKey
+    const term = super.getMetadata(sheetKey)
     if (term) {
-      return JSON.parse(term);
+      return JSON.parse(term)
     }
   }
   /**
@@ -421,8 +487,8 @@ class SpreadSheetMetadata extends Metadata {
    * @param {object} term договорные условия в формате ключ/значение
    */
   addTerm(sheetKey, term) {
-    term = JSON.stringify(term);
-    sheetKey = 'TERMKEY_' + sheetKey;
-    super.addMetadata(sheetKey, term);
+    term = JSON.stringify(term)
+    sheetKey = 'TERMKEY_' + sheetKey
+    super.addMetadata(sheetKey, term)
   }
 }
