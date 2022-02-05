@@ -43,8 +43,9 @@ function coinsList(include_platform) {
 
 /**
  * List all supported coins price, market cap, volume, and market related data
- * @param {string} vs_currency The target currency of market data (usd, eur, jpy, etc.)
+ *
  * @param {string} ids The ids of the coin, comma separated crytocurrency symbols (base). refers to /coins/list
+ * @param {string} vs_currency The target currency of market data (usd, eur, jpy, etc.)
  * @param {string} price_change_percentage Include price change percentage in 1h, 24h, 7d, 14d, 30d, 200d, 1y (eg. '1h,24h,7d' comma-separated, invalid values will be discarded)
  * @returns {array}
  */

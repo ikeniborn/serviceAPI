@@ -49,9 +49,8 @@ function priceHistoricalDay(fsym, tsyms, ts) {
 /**
  * Returns all the coins that CryptoCompare has added to the website.
  *
- * @param {string} fsym
- * @returns {object}
+ * @returns {object} Return object {id:{key:value}}
  */
-function infoCoinList(fsym) {
-  return new Info().coinList(fsym)
+function infoCoinList() {
+  return new Info().coinList()
 }

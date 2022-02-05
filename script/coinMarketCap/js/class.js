@@ -1,5 +1,5 @@
 class Instance {
-  constructor(API_KEY) {
+  constructor(apiKey) {
     if (Instance.exists) {
       return Instance.instance
     }
@@ -12,27 +12,30 @@ class Instance {
       {
         muteHttpExceptions: true,
         contentType: 'accept: application/json',
-        headers: { 'X-CMC_PRO_API_KEY': API_KEY },
+        headers: { 'X-CMC_PRO_API_KEY': apiKey },
       }
     )
   }
 }
 
-class CryptocurrencyQuotes {
-  constructor(slug = 'bitcoin', convert = 'USD') {
+class Cryptocurrency {
+  constructor() {
     new Instance()
-    this.slug = slug
-    this.convert = convert
   }
-  latest() {
+
+  quotesLatest(id = '1', convert = 'USD') {
     return apiLib.method(
       'get',
       '/cryptocurrency/quotes/latest',
       {},
       {
-        slug: this.slug,
-        convert: this.convert,
+        id,
+        convert,
       }
     ).data
+  }
+
+  mapList() {
+    return apiLib.method('get', '/cryptocurrency/map', {}, {}).data
   }
 }

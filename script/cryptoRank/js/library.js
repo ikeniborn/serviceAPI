@@ -10,10 +10,19 @@ function instance(api_key) {
  * List of currencies with data
  *
  * @param {string} ids List of currency ids with comma separator. Example: ids=1,2,3
- * @param {string} symbols List of currency symbols with comma separator. Example: symbols=BTC,LTC,BNB
  * @param {string} convert Prices will show in this currency. Enum: "USD" "ETH" "BTC"
  * @returns {array}
  */
-function currenciesLatest(ids, symbols, convert) {
-  return new Currencies(ids, symbols, convert).latest()
+function currenciesLatest(ids, convert) {
+  return new Currencies(convert).latest(ids)
+}
+
+/**
+ * List of currencies with data
+ *
+ * @param {number} limit Limit count list return
+ * @returns {array}
+ */
+function currenciesList(limit) {
+  return new Currencies().list(limit)
 }

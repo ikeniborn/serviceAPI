@@ -18,23 +18,34 @@ class Instance {
 }
 
 class Currencies {
-  constructor(symbols = '', convert = 'USD') {
+  constructor(convert = 'USD') {
     new Instance()
-    this.symbols = symbols
     if (['USD', 'BTC', 'ETH'].indexOf(convert) === -1) {
       this.convert = 'USD'
     } else {
       this.convert = convert.toUpperCase()
     }
   }
-  latest() {
+  latest(ids = '1') {
     return apiLib.method(
       'get',
       '/currencies',
       {},
       {
         convert: this.convert,
-        symbols: this.symbols,
+        ids: ids,
+      }
+    ).data
+  }
+  list(limit = 100) {
+    return apiLib.method(
+      'get',
+      '/currencies',
+      {},
+      {
+        convert: this.convert,
+        state: 'active',
+        limit: limit,
       }
     ).data
   }

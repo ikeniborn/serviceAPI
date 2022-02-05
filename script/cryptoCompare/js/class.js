@@ -76,9 +76,7 @@ class Info {
   constructor() {
     new Instance()
   }
-  coinList(fsym = '') {
-    let query
-    fsym ? (query = { fsym }) : (query = {})
-    return apiLib.method('get', '/all/coinlist', {}, query).Data
+  coinList() {
+    return apiLib.method('get', '/all/coinlist', {}, {}).Data
   }
 }
