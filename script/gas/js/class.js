@@ -5,7 +5,6 @@ class Instance {
         spreadSheetName: '',
         sheetId: '',
         scriptId: '',
-        excludeSheetName: [],
         area: '',
       },
     ]
@@ -38,13 +37,13 @@ class Instance {
               this[ssName] = {}
             }
             this[ssName].ss = ss
-            if (!row.excludeSheetName) {
-              this[ssName].excludeSheetName = []
-            } else {
-              this[ssName].excludeSheetName = row.excludeSheetName.map((m) =>
-                m.toLowerCase()
-              )
-            }
+            // if (!row.excludeSheetName) {
+            //   this[ssName].excludeSheetName = []
+            // } else {
+            //   this[ssName].excludeSheetName = row.excludeSheetName.map((m) =>
+            //     m.toLowerCase()
+            //   )
+            // }
           }
         })
       } else {
@@ -60,27 +59,32 @@ class GasSpreadSheet {
   /**
    * Получение книги инстанса
    */
-  constructor(spreadSheetName = '') {
+  constructor(spreadSheetName = '', excludeSheetName = []) {
     const instance = new Instance()[spreadSheetName]
-    this.spreadSheetName = spreadSheetName
     this.ss = instance.ss
-    this.excludeSheetName = instance.excludeSheetName
+    this.excludeSheetName = excludeSheetName.map((m) => (m = m.toLowerCase()))
   }
 }
 
 class GasWorkSheet extends GasSpreadSheet {
-  constructor(spreadSheetName = '', sheetName = '', headerRowNum = 1) {
+  constructor(
+    spreadSheetName = '',
+    sheetName = '',
+    headerRowNum = 1,
+    getRowNum = false,
+    getRowHash = false
+  ) {
     super(spreadSheetName)
-    sheetName = sheetName.toLowerCase()
+    this.sheetName = sheetName.toLowerCase()
     this.headerRowNum = headerRowNum
     this.ws = this.ss
       .getSheets()
       .filter(
         (f) =>
-          f.getName().toLowerCase() === sheetName &&
-          this.excludeSheetName.indexOf(sheetName) === -1
+          f.getName().toLowerCase() === this.sheetName &&
+          this.excludeSheetName.indexOf(this.sheetName) === -1
       )[0]
-    this.getRange().getValues()
+    this.getRange(headerRowNum).getValues(getRowNum, getRowHash)
   }
 
   /**
@@ -106,50 +110,57 @@ class GasWorkSheet extends GasSpreadSheet {
    *
    * @returns range, countRow, countColumn
    */
-  getRange() {
+  getRange(headerRowNum) {
     const dataRange = this.ws.getDataRange()
     //* Удаление заголовка
-    this.countRow = dataRange.getNumRows() - this.headerRowNum
+    this.countRow = dataRange.getNumRows() - headerRowNum
     this.countColumn = dataRange.getNumColumns()
     //* формирование заголовка
     this.headerRange = dataRange.offset(
-      this.headerRowNum - 1,
+      headerRowNum - 1,
       0,
       1,
       this.countColumn
     )
     this.dataRange =
       this.countRow > 0
-        ? dataRange.offset(
-            this.headerRowNum,
-            0,
-            this.countRow,
-            this.countColumn
-          )
+        ? dataRange.offset(headerRowNum, 0, this.countRow, this.countColumn)
         : this.headerRange
     return this
   }
 
-  /**
-   * Получение данных листа
-   * @param {boolean} getRowNum параметр получения номера строки
-   * @param {boolean} getRowHash параметр получения хэша строки
-   * @returns
-   */
-  getValues(getRowNum = false, getRowHash = false) {
+  getValues(getRowNum, getRowHash) {
     this.headerValues = this.headerRange.getValues()[0]
-    this.dataValues = this.dataRange.getValues().map((row, index) => {
+    if (getRowNum && !getRowHash) {
+      this.headerValues = ['rowNum', ...this.headerValues]
+    } else if (!getRowNum && getRowHash) {
+      this.headerValues = ['hashKey', ...this.headerValuesw]
+    } else if (getRowNum && getRowHash) {
+      this.headerValues = ['rowNum', 'hashKey', ...this.headerValues]
+    }
+    this.dataObject = []
+    this.dataValues = []
+    this.dataRange.getValues().forEach((row, index) => {
+      let rowValues
       if (getRowNum && !getRowHash) {
         const rowNum = index + this.headerRowNum + 1
-        return [rowNum, ...row]
+        rowValues = [rowNum, ...row]
       } else if (!getRowNum && getRowHash) {
-        return [new Hash(row.join('#')).md5, ...row]
+        rowValues = [new Hash(row.join('#')).md5, ...row]
       } else if (getRowNum && getRowHash) {
         const rowNum = index + this.headerRowNum + 1
-        return [rowNum, new Hash(row.join('#')).md5, ...row]
+        rowValues = [rowNum, new Hash(row.join('#')).md5, ...row]
       } else {
-        return row
+        rowValues = row
       }
+      const rowObject = rowValues.reduce((keyValue, value, index) => {
+        if (!keyValue[this.headerValues[index]]) {
+          keyValue[this.headerValues[index]] = value
+        }
+        return keyValue
+      }, {})
+      this.dataValues.push(rowValues)
+      this.dataObject.push(rowObject)
     })
     return this
   }

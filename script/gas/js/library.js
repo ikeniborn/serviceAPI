@@ -2,6 +2,7 @@ var spreadSheet,
   workSheet,
   workSheetHeaderValues,
   workSheetDataValues,
+  workSheetDataObject,
   workSheetCountRow,
   workSheetCountColumn,
   workSheetHeaderRange,
@@ -10,8 +11,7 @@ var spreadSheet,
   workSheetDeleteEmptyRows
 
 /**
- *
- * @param {array} environment Array of object source [{spreadSheetName: '', sheetId: '', scriptId: '', excludeSheetName: [] ,area: ''}]
+ * @param {array} environment Array of object source [{spreadSheetName: '', sheetId: '', scriptId: '' ,area: ''}]
  */
 function instance(environment) {
   new Instance(environment)
@@ -19,28 +19,42 @@ function instance(environment) {
 
 /**
  *
- *
- * @param {string} spreadSheetName
+ * @param {string} spreadSheetName Name spreadsheet
+ * @param {array} excludeSheetName Array exclude sheet ['name']
  * @returns {gasLib}
  */
-function getSpreadSheet(spreadSheetName) {
-  spreadSheet = new GasSpreadSheet(spreadSheetName).ss
+function getSpreadSheet(spreadSheetName, excludeSheetName) {
+  spreadSheet = new GasSpreadSheet(spreadSheetName, excludeSheetName).ss
 }
 
 /**
  *
- *
- * @param {string} spreadSheetName
- * @param {string} sheetName
- * @param {number} headerRowNum
+ * @param {string} spreadSheetName имя книги
+ * @param {string} sheetName имя листа
+ * @param {number} headerRowNum номер строки заголовка
+ * @param {boolean} getRowNum параметр получения номера строки
+ * @param {boolean} getRowHash параметр получения хэша строки
  * @returns {gasLib}
  */
-function getWorkSheet(spreadSheetName, sheetName, headerRowNum) {
-  const data = new GasWorkSheet(spreadSheetName, sheetName, headerRowNum)
+function getWorkSheet(
+  spreadSheetName,
+  sheetName,
+  headerRowNum,
+  getRowNum,
+  getRowHash
+) {
+  const data = new GasWorkSheet(
+    spreadSheetName,
+    sheetName,
+    headerRowNum,
+    getRowNum,
+    getRowHash
+  )
   spreadSheet = data.ss
   workSheet = data.ws
   workSheetHeaderValues = data.headerValues
   workSheetDataValues = data.dataValues
+  workSheetDataObject = data.dataObject
   workSheetCountRow = data.countRow
   workSheetCountColumn = data.countColumn
   workSheetHeaderRange = data.headerRange
