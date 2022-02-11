@@ -64,7 +64,7 @@ class Price {
       '/pricehistorical',
       {},
       {
-        fsyms: fsym,
+        fsym: fsym,
         tsyms: this.tsyms,
         ts: ts,
       }

@@ -8,7 +8,9 @@ var spreadSheet,
   workSheetHeaderRange,
   workSheetDataRange,
   workSheetDeleteEmptyColumns,
-  workSheetDeleteEmptyRows
+  workSheetDeleteEmptyRows,
+  workSheetGetValues,
+  workSheetGetRange
 
 /**
  * @param {array} environment Array of object source [{spreadSheetName: '', sheetId: '', scriptId: '' ,area: ''}]
@@ -29,12 +31,11 @@ function getSpreadSheet(spreadSheetName, excludeSheetName) {
 
 /**
  *
- * @param {string} spreadSheetName имя книги
- * @param {string} sheetName имя листа
- * @param {number} headerRowNum номер строки заголовка
- * @param {boolean} getRowNum параметр получения номера строки
- * @param {boolean} getRowHash параметр получения хэша строки
- * @returns {gasLib}
+ * @param {string} spreadSheetName
+ * @param {string} sheetName
+ * @param {number} headerRowNum
+ * @param {boolean} getRowNum
+ * @param {boolean} getRowHash
  */
 function getWorkSheet(
   spreadSheetName,
@@ -59,10 +60,6 @@ function getWorkSheet(
   workSheetCountColumn = data.countColumn
   workSheetHeaderRange = data.headerRange
   workSheetDataRange = data.dataRange
-  workSheetDeleteEmptyColumns = () => {
-    data.deleteEmptyColumns()
-  }
-  workSheetDeleteEmptyRows = () => {
-    data.deleteEmptyRows()
-  }
+  workSheetDeleteEmptyColumns = data.deleteEmptyColumns
+  workSheetDeleteEmptyRows = data.deleteEmptyRows
 }

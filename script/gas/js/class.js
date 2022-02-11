@@ -76,7 +76,6 @@ class GasWorkSheet extends GasSpreadSheet {
   ) {
     super(spreadSheetName)
     this.sheetName = sheetName.toLowerCase()
-    this.headerRowNum = headerRowNum
     this.ws = this.ss
       .getSheets()
       .filter(
